@@ -211,7 +211,7 @@ def encrypt(block64: str) -> str:
     combined = R + L 
     return permutation(combined, FP)
 
-def decryption(block64, IP):
+def decryption(block64):
     #decrypting a single 64 bit block using DES
     #same process but subkeys applied in reverse order
     permuted = permutation(block64, IP)
