@@ -166,3 +166,70 @@ def Sbox(bits4):
 #find Sbox value
 #Convert 4 bit binary string 
 
+
+
+
+def subkeys (key64: str) -> list:
+    #creating 16 DES subkeys from 64 bit key
+    key56= permutation (key64 ,PC1)
+    R , L = key56[:28], key56[28:]
+    shifts = [1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1]
+
+    subkey_s = []
+    for s in shifts:
+        R = left_shift(R, s)
+        L = left_shift(L, s)
+        subkey_s.append(permutation(R + L, PC2))
+    return subkey_s
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+text_input = input("Enter plaintext:")
+block = text_input[8:]
+while len (block) <8:
+    block += ' ' 
+    #padding with spaces if less than 8 characters
+print ("\n [NOTE] Using the first 8 characters only:", block)
+    #making sure the user knows that we need only the first 8 characters
+
+
+hex = ""
+for char in block:
+    hex += format(ord(char), '02X') #From ASCII to hex
+
+binary_text= bin(int(hex, 16))[2:] #hex to integer to binary
+while len(binary_text) < 64:
+    binary_text = '0' + binary_text
+    #padding if necessary 
+
+print("\n CONVERSIONS ")
+print("ASCII :", block)
+print("HEX :", hex)
+print("BINARY :", binary_text)
+
+
+#DES key
+key_in_hex ="133457799BBCDFF1"
+
+key_in_binary= bin(int(key_in_hex, 16))[2:]
+while len(key_in_binary) < 64:
+    key_in_binary = '0' + key_in_binary
+
+subkeys= subkeys_generated(key_in_binary)
