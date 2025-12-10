@@ -181,11 +181,18 @@ def subkeys (key64: str) -> list:
         L = left_shift(L, s)
         subkey_s.append(permutation(R + L, PC2))
     return subkey_s
+#key sechedule 16 rounds
 
 
-
-
-
+def feistel(R:str, roundkey:str):
+#step 1 - 32 to 48 bits
+    block_expansion = permutation(R, E)
+#step 2 - xor with roundkey
+    XOR= XORing(block_expansion, roundkey)
+#step 3 - sbox substituation 48 to 32 bits
+    substituation= Sbox(XOR)
+#step 4 - pbox final 32 bit output
+    return permutation(substituation, P)
 
 
 
