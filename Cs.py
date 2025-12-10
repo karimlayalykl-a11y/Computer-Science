@@ -248,11 +248,11 @@ if __name__ == "__main__":
     #making sure the user knows that we need only the first 8 characters
 
 
-hex = ""
+hex_str = ""
 for char in block:
-    hex += format(ord(char), '02X') #From ASCII to hex
+    hex_str += format(ord(char), '02X') #From ASCII to hex
 
-binary_text= bin(int(hex, 16))[2:] #hex to integer to binary
+binary_text= bin(int(hex_str, 16))[2:] #hex to integer to binary
 while len(binary_text) < 64:
     binary_text = '0' + binary_text
     #padding if necessary 
@@ -277,7 +277,7 @@ subkeyss= subkeys(key_in_binary)
 #Run mode main
 
 
-mode = print(input("Please select mode: Encrypt (E) or Decrypt(D):")) .strip().upper()
+mode = input ("Please select mode: Encrypt (E) or Decrypt(D):").strip().upper()
 
 
 if mode == "E": 
@@ -308,4 +308,4 @@ elif mode == "D":
 
 
 else: 
-    print ("ERROR:invalid, Please choose 'E' for Encryption or 'D' for Decryption")
+    print ("ERROR:invalid, Please choose 'E' for Encryption or 'D' for Decryption") #if the user choose a wrong option 
