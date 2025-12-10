@@ -200,23 +200,26 @@ def feistel(R:str, roundkey:str):
 
         #Encryption ////// Decryption 
 
-def encrypt(block64:str) -> str:
+def encrypt(block64: str) -> str:
     #encrypting a single 64 bit block using DES
     permuted = permutation(block64, IP)
-    R, L = permuted[:32], permuted[32:]  #IP
+    L, R = permuted[:32], permuted[32:]  #IP
 
     for i in range(16):
-        R, L = R, XORing(L, feistel(R, subkeys[i]))
+        L, R = R, XORing(L, feistel(R, subkeyss[i]))
+
     combined = R + L 
-    return permutation(combined,FP)
+    return permutation(combined, FP)
 
 def decryption(block64, IP):
     #decrypting a single 64 bit block using DES
     #same process but subkeys applied in reverse order
     permuted = permutation(block64, IP)
-    R, L = permuted[32:], permuted[:32]
+    L, R = permuted[:32], permuted[32:]
+
     for i in range(16):
-        R, L = R, XORing(L, feistel(R, subkeys[15 - i]))
+        L, R = R, XORing(L, feistel(R, subkeyss[15 - i]))
+
     combined = R + L
     return permutation(combined, FP)
 
@@ -274,7 +277,7 @@ subkeyss= subkeys(key_in_binary)
 #Run mode main
 
 
-mode = print(input)("Please select mode: Encrypt (E) or Decrypt(D):") .strip().upper()
+mode = print(input("Please select mode: Encrypt (E) or Decrypt(D):")) .strip().upper()
 
 
 if mode == "E": 
@@ -287,7 +290,7 @@ if mode == "E":
 
 elif mode == "D":
     cipher_input = input("Please Enter ciphertext (16-character HEX)").strip()
-    cipher_binary = bin(int(cipher_input,16))[2:].zfill(16)
+    cipher_binary = bin(int(cipher_input,16))[2:].zfill(64)
     plain_binary = decryption(cipher_binary)
     plain_hexa = hex(int(plain_binary, 2))[2:].upper()
     plain_text = bytes.fromhex(plain_hexa).decode('ascii', 'ignore').rstrip()    #convert decrypted hex string to ASCII
