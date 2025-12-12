@@ -51,3 +51,7 @@ def bits_bytes(bits: list) -> bytes:
     return bytes(outcome)
 
                 #takes list of bits and turns them into bytes (group of 8)
+
+
+
+#Read /// Write (FILE)
