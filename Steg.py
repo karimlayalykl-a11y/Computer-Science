@@ -57,15 +57,23 @@ def bits_bytes(bits: list) -> bytes:
 #Read /// Write (FILE)
 
 def file_read(path:str) -> bytearray:
-    filee = open(path, 'rb')   #rb = read binary
-    data = bytearray(filee.read())
-    filee.close()
-    return data 
+    try: 
+        filee = open(path, 'rb')   #rb = read binary
+        data = bytearray(filee.read())
+        filee.close()
+        return data 
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found; {path}")
+    except IOError as e:
+        raise IOError(f"Cannot read file {path}: {e}")
 
 def file_write(path:str, data: bytearray):
-    filee = open(path, 'wb')   #wb = write binary 
-    filee.write(data)
-    filee.close 
+    try: 
+        filee = open(path, 'wb')   #wb = write binary 
+        filee.write(data)
+        filee.close 
+    except IOError as e:
+        raise IOError(f"Cannot write file {path}: {e}")
 
     #both read and write need the path of the file to function
 
@@ -161,6 +169,13 @@ def extraction_bits(imagee: bytearray, offset: int, number_bits: int):
 
             #ENCODING //// DECODING 
 def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
+
+    if len(message_bytes) == 0:
+        raise ValueError("Cannot encode empty message.")
+    if len(message_bytes) > 0xFFFFFFFFFFFFFFFFF:
+        raise ValueError("Too large for 64 bit length")
+    
+
     data = file_read(image_path)
     offset, width, height, bit_per_pixel = photo_validation(data)
     capacity = capacity__bits_BMP(data, offset)
@@ -168,6 +183,7 @@ def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
     bytes_length = integer_bytes(len(message_bytes), Len_bytes)
     PL = GAM + Len_bytes + message_bytes
     PL_bits = bytes_bits(PL)
+
     if len(PL_bits) > capacity:
         raise ValueError("Message to large to embed")
     bit_embeded(data, offset, PL_bits)
@@ -193,8 +209,19 @@ def DECODE(image_path: str):
     Len_bytes = bytes_header[4:12]
     Message_length = bytes_integer(Len_bytes)
 
+    capacity = capacity__bits_BMP(data, offset, width, height)
+    if bits_header +Message_length*8 > capacity:
+        raise ValueError("Message length dosent work with BMP image size, Data may be incomplete or corrupted")
+
     Message_bits = extraction_bits(data, offset, BITS_header, Message_length*8)
     Message_bytes = bits_bytes(Message_bits)
+
+    next_offset = offset + bits_header + Message_length*8 
+    if next_offset + len(GAM)*8 <= capacity:
+        next_bits = extraction_bits(data, next_offset, len(GAM)*8)
+        next_bytes = bits_bytes(next_bits)
+        if next_bytes == GAM
+        print("WARNING: It appears there are muiltple messages present in this Image")
     return Message_bytes
 
 
@@ -230,4 +257,29 @@ def bytes_message():
         print("Invalid Choice, please choose betweent the given option")
         return bytes_message
     
-    
+    #making the user choose between 2 options and if the user did not enter the options avaiable it will restart
+
+
+
+def MAIN(): 
+  while True: 
+    mode = input("Please select mode; Encode (e) or Decode (d)").strip().lower()
+    if mode == '' or mode == 'e':
+        image_input = input("Enter path to the BMP image; where the message will be encoded")
+        image_output = input("Enter path for the output of encoded BMP image")
+        message_bytes = bytes_message()
+        ENCODE(image_input, image_output, message_bytes)
+    elif mode == 'd':
+        image_input = input("Please enter the path of the BMP image to decode")
+        message_bytes = DECODE(image_input)
+        try: 
+            print("\n The Decoded Message: \n")
+            print(message_bytes.decode('utf-8'))
+        except: 
+            print("\n Decoded bytes:")
+            print(message_bytes)
+    else: 
+        print("Invalid Answer. Please try again, Choose between the following; Encode (e) or Decode (d)")
+
+if __name__ == "__main__":
+    MAIN()
