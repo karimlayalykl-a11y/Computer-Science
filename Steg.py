@@ -58,14 +58,14 @@ def bits_bytes(bits: list) -> bytes:
 
 def file_read(path:str) -> bytearray:
     try: 
-        filee = open(path, 'rb')   #rb = read binary
-        data = bytearray(filee.read())
-        filee.close()
-        return data 
-    except FileNotFoundError:
-        raise FileNotFoundError(f"File not found; {path}")
-    except IOError as e:
-        raise IOError(f"Cannot read file {path}: {e}")
+        with open(path, 'rb') as f:
+            return bytearray(f.read())
+    except FileNotFoundError :
+        raise FileNotFoundError (f'File not found: {path}')
+    except OSError as e:
+        raise OSError(f'Cannot read file {path}: {e}') from e 
+
+
 
 def file_write(path:str, data: bytearray):
     try: 
@@ -176,9 +176,9 @@ def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
         raise ValueError("Too large for 64 bit length")
     
 
-    data = file_read(image_path)
-    offset, width, height, bit_per_pixel = photo_validation(data)
-    capacity = capacity__bits_BMP(data, offset)
+    dataa = file_read(image_path)
+    offset, width, height, bit_per_pixel = photo_validation(dataa)
+    capacity = capacity__bits_BMP(dataa, offset)
 
     bytes_length = integer_bytes(len(message_bytes), Len_bytes)
     PL = GAM + Len_bytes + message_bytes
@@ -186,8 +186,8 @@ def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
 
     if len(PL_bits) > capacity:
         raise ValueError("Message to large to embed")
-    bit_embeded(data, offset, PL_bits)
-    file_write(out_path, data)
+    bit_embeded(dataa, offset, PL_bits)
+    file_write(out_path, dataa)
     print ("Message has been encoded into image successfully.")
 
 #offset is to start embedding at pixel data, skipping the header atm
@@ -200,7 +200,7 @@ def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
 
 def DECODE(image_path: str):
     data = file_read(image_path)
-    offset, width, height, bit_per_pixel = photo_validation(data)
+    offset, width, height, Bits_per_pixel = photo_validation(data)
 
     bits_header = extraction_bits(data, offset, BITS_header)
     bytes_header = bits_bytes(bits_header)
@@ -282,4 +282,4 @@ def MAIN():
         print("Invalid Answer. Please try again, Choose between the following; Encode (e) or Decode (d)")
 
 if __name__ == "__main__":
-    MAIN()
+        MAIN()  
