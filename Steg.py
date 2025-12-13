@@ -143,7 +143,7 @@ def capacity__bits_BMP(data: bytearray, p_offset:int): #calculating available bi
 
 def bit_embeded(imagee: bytearray, offset: int, bits: list):
     Maximum_bits = capacity__bits_BMP(imagee, offset)
-    if len(bits) > Maximum_bits
+    if len(bits) > Maximum_bits:
         raise ValueError("Not enough space in image")
     for i, bit in enumerate(bits):
         id = offset + i
@@ -220,8 +220,8 @@ def DECODE(image_path: str):
     if next_offset + len(GAM)*8 <= capacity:
         next_bits = extraction_bits(data, next_offset, len(GAM)*8)
         next_bytes = bits_bytes(next_bits)
-        if next_bytes == GAM
-        print("WARNING: It appears there are muiltple messages present in this Image")
+        if next_bytes == GAM:
+            print("WARNING: It appears there are muiltple messages present in this Image")
     return Message_bytes
 
 
@@ -237,17 +237,17 @@ def DECODE(image_path: str):
 
             #USER input for steg application (MESSAGE)(TYPED OR FILE)
 def bytes_message():
-    mode = input("\n Please Choose your message input; (Type message / Provide file): ").strip().lower()
-    if mode == " " or mode == 'type':
+    mode = input("\n Please Choose your message input; (Type message (T) / Provide file (F)): ").strip().lower()
+    if mode == " " or mode == 't':
         print("Please Enter Message (Leave an empty line when done)")
-        msg = []
+        msgg = []
         while True:
             msg = input()
             if msg == '':
                 break 
-            msg.append(msg)
-        return '\n'.join(msg).encode('utf-8')
-    elif mode == 'file':
+            msgg.append(msg)
+        return '\n'.join(msgg).encode('utf-8')
+    elif mode == 'f':
         msg_path = input("Enter the path to the text file you want to encode").strip()
         f = open(msg_path, 'rb')
         data = f.read()
