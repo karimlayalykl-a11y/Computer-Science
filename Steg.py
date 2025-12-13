@@ -131,3 +131,103 @@ def capacity__bits_BMP(data: bytearray, p_offset:int): #calculating available bi
 
 
         #start of    EMBDDING /////// EXTRACTION
+
+
+def bit_embeded(imagee: bytearray, offset: int, bits: list):
+    Maximum_bits = capacity__bits_BMP(imagee, offset)
+    if len(bits) > Maximum_bits
+        raise ValueError("Not enough space in image")
+    for i, bit in enumerate(bits):
+        id = offset + i
+        imagee[id] = (imagee(id) & 0xFE) | bit 
+    return imagee
+# loop walks through image bytes and hides one bit inside the LSB of each byte
+#enumerate helps with when needing both imgae and its index in a loop
+
+def extraction_bits(imagee: bytearray, offset: int, number_bits: int):
+    maximum_bits = capacity__bits_BMP(imagee, offset)
+    if number_bits > maximum_bits:
+        raise ValueError("Not enough data in image")
+    bitss = []
+    for i in range(number_bits):
+        bitss.append(imagee[offset+i] & 1)
+    return bitss
+
+#extracting bits from the LSB of the image 
+
+
+
+
+
+            #ENCODING //// DECODING 
+def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
+    data = file_read(image_path)
+    offset, width, height, bit_per_pixel = photo_validation(data)
+    capacity = capacity__bits_BMP(data, offset)
+
+    bytes_length = integer_bytes(len(message_bytes), Len_bytes)
+    PL = GAM + Len_bytes + message_bytes
+    PL_bits = bytes_bits(PL)
+    if len(PL_bits) > capacity:
+        raise ValueError("Message to large to embed")
+    bit_embeded(data, offset, PL_bits)
+    file_write(out_path, data)
+    print ("Message has been encoded into image successfully.")
+
+#offset is to start embedding at pixel data, skipping the header atm
+#payload which is manditory for recognigtion 
+#Start embedding the LSB one bit per byte 
+#adding the signature
+#Capacity checker
+#Conversion 
+
+
+def DECODE(image_path: str):
+    data = file_read(image_path)
+    offset, width, height, bit_per_pixel = photo_validation(data)
+
+    bits_header = extraction_bits(data, offset, BITS_header)
+    bytes_header = bits_bytes(bits_header)
+    if bytes_header[0:4] != GAM:
+        raise ValueError("GAM not found; No Message to decode.")
+    Len_bytes = bytes_header[4:12]
+    Message_length = bytes_integer(Len_bytes)
+
+    Message_bits = extraction_bits(data, offset, BITS_header, Message_length*8)
+    Message_bytes = bits_bytes(Message_bits)
+    return Message_bytes
+
+
+#Header extraction = getting message length 
+#Making sure that there is an actual message to decode
+#checking signature 
+#LSB extraction one bit oer byte from the pixel data
+#conversion 
+
+
+
+
+
+            #USER input for steg application (MESSAGE)(TYPED OR FILE)
+def bytes_message():
+    mode = input("\n Please Choose your message input; (Type message / Provide file): ").strip().lower()
+    if mode == " " or mode == 'type':
+        print("Please Enter Message (Leave an empty line when done)")
+        msg = []
+        while True:
+            msg = input()
+            if msg == '':
+                break 
+            msg.append(msg)
+        return '\n'.join(msg).encode('utf-8')
+    elif mode == 'file':
+        msg_path = input("Enter the path to the text file you want to encode").strip()
+        f = open(msg_path, 'rb')
+        data = f.read()
+        f.close()
+        return data
+    else:
+        print("Invalid Choice, please choose betweent the given option")
+        return bytes_message
+    
+    
