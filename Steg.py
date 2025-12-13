@@ -55,3 +55,44 @@ def bits_bytes(bits: list) -> bytes:
 
 
 #Read /// Write (FILE)
+
+def file_read(path:str) -> bytearray:
+    filee = open(path, 'rb')   #rb = read binary
+    data = bytearray(filee.read())
+    filee.close()
+    return data 
+
+def file_write(path:str, data: bytearray):
+    filee = open(path, 'wb')   #wb = write binary 
+    filee.write(data)
+    filee.close 
+
+    #both read and write need the path of the file to function
+
+
+
+# Start of Side cases 
+
+def photo_validation(data: bytearray):
+    if len(data) < Header_BMP:
+        raise ValueError("Too small of a file to be BMP image")
+    if data [0:2] != b'BM': #signature 
+        raise ValueError("Not a BMP file")
+    
+    offset = data[10] | (data[11]<<8) | (data[12]<<16) | (data[13]<<24)
+
+    if offset >= len(data):
+        raise ValueError("invalid pixel data offset")
+    
+    DIB_header_size = data[14] | (data[15]<<8) | (data[16]<<16) | (data[17]<<24)
+    
+    if DIB_header_size < Header_DIB_MIN: 
+            raise ValueError("Nonsupported header (DIB)")
+
+
+    width = data[18] | (data[15]<<8) | (data[16]<<
+    #contiinue height and do manual handling 
+
+     
+        
+    # next ---   planes / bpp / compression 
