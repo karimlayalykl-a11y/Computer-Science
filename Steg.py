@@ -90,9 +90,44 @@ def photo_validation(data: bytearray):
             raise ValueError("Nonsupported header (DIB)")
 
 
-    width = data[18] | (data[15]<<8) | (data[16]<<
-    #contiinue height and do manual handling 
+    width = (data[18] | (data[19]<<8) | (data[20]<<16) | (data[21]<<24))
+    height = (data[22] | (data[23]<<8) | (data[24]<<16) | (data[25]<<24))
+    # W & H (bytes 28-25)
 
-     
-        
-    # next ---   planes / bpp / compression 
+    if width & (1 << 31):
+        width -=(1 << 32)
+    if height & (1 << 31):
+        height -=(1 << 32)
+
+
+    planes = data[26] | (data[27]<<8) #planes = bytes 26-27
+    if planes != 1:
+        raise ValueError("Number of planes are unexpected")
+    
+    Bits_per_pixel = data[28] | (data[29]<<8)  #bbp = bytes 28-29
+    if Bits_per_pixel !=24:
+        raise ValueError("only 24 bit BMP are supported")
+    
+    compressionn = data[30] | (data[31]<<8) | (data[32]<<16) | (data[33]<<24)
+    if compressionn != 0:
+        raise ValueError("Any compressed BMP are not supported")
+
+    return offset, width, abs(height), Bits_per_pixel
+
+    
+
+
+
+        #capacity checker (capacity calculation)
+    
+
+def capacity__bits_BMP(data: bytearray, p_offset:int): #calculating available bits for the LSB embed
+    sum_bytes = len(data) - p_offset
+    if sum_bytes <= 0:
+        return 0
+    return sum_bytes  #1 bit for every byte
+    
+
+
+
+        #start of    EMBDDING /////// EXTRACTION
