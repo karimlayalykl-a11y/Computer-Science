@@ -252,7 +252,10 @@ def bytes_message():
             msgg.append(msg)
         return '\n'.join(msgg).encode('utf-8')
     elif mode == 'f':
-        msg_path = Local_p(input("Enter the File name to the text file you want to encode")).strip()
+        msg_path = Local_p(
+            input("Enter the File name to the text file you want to encode").strip()
+        ) 
+
         f = open(msg_path, 'rb')
         data = f.read()
         f.close()
@@ -269,17 +272,25 @@ def MAIN():
   while True: 
     mode = input("Please select mode; Encode (e) or Decode (d)").strip().lower()
     if mode == '' or mode == 'e':
-        image_input = Local_p(input("Enter BMP image file name; where the message will be encoded (e.g encode.bmp)")).strip()
-        image_output = Local_p(input("Enter File name for output of encoded BMP image")).strip()
+        image_input = Local_p(
+            input("Enter BMP image file name; where the message will be encoded (e.g encode.bmp)").strip()
+        )
+        image_output = Local_p(
+            input("Enter File name for output of encoded BMP image").strip()
+        )
+
         message_bytes = bytes_message()
         ENCODE(image_input, image_output, message_bytes)
     elif mode == 'd':
-        image_input = Local_p(input("Please enter the File name of the BMP image to decode")).strip()
+        image_input = Local_p(
+            input("Please enter the File name of the BMP image to decode").strip()
+        )
+
         message_bytes = DECODE(image_input)
         try: 
             print("\n The Decoded Message: \n")
             print(message_bytes.decode('utf-8'))
-        except: 
+        except UnicodeDecodeError: 
             print("\n Decoded bytes:")
             print(message_bytes)
     else: 
