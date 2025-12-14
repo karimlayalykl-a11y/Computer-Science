@@ -10,6 +10,10 @@ BITS_header = (len(GAM) + Len_bytes)*8 #total number of bits in header (GAM+LENG
 Header_BMP = 14 #14 byte file header (should not go over these bytes)
 Header_DIB_MIN = 40 #40 minimum for most BMP photos
 
+def Local_p(filename:str) -> str: #helps avoid any path file errors
+    BD = __file__[:__file__.rfind('\\')]
+    return BD + '\\' + filename
+
 
 
 #FUNCTIONS 
@@ -18,13 +22,13 @@ def integer_bytes(n: int, leng: int) -> bytes:
     for _ in range (leng):
         bt.append (n & 0xff)
         n >>= 8 
-    return bytes
+    return bt
 
                 #converting integer "n" to bytes of specififed length
 
 def bytes_integer(b: bytes) -> int: 
     n = 0 
-    for i in range(len(b)-1, -1. -1): 
+    for i in range(len(b)-1, -1, -1): 
         n = (n << 8) | b[i]
     return n 
 
@@ -71,7 +75,7 @@ def file_write(path:str, data: bytearray):
     try: 
         filee = open(path, 'wb')   #wb = write binary 
         filee.write(data)
-        filee.close 
+        filee.close()
     except IOError as e:
         raise IOError(f"Cannot write file {path}: {e}")
 
@@ -147,7 +151,7 @@ def bit_embeded(imagee: bytearray, offset: int, bits: list):
         raise ValueError("Not enough space in image")
     for i, bit in enumerate(bits):
         id = offset + i
-        imagee[id] = (imagee(id) & 0xFE) | bit 
+        imagee[id] = (imagee[id] & 0xFE) | bit 
     return imagee
 # loop walks through image bytes and hides one bit inside the LSB of each byte
 #enumerate helps with when needing both imgae and its index in a loop
@@ -172,7 +176,7 @@ def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
 
     if len(message_bytes) == 0:
         raise ValueError("Cannot encode empty message.")
-    if len(message_bytes) > 0xFFFFFFFFFFFFFFFFF:
+    if len(message_bytes) > 0xFFFFFFFFFFFFFFFF:
         raise ValueError("Too large for 64 bit length")
     
 
@@ -181,7 +185,7 @@ def ENCODE(image_path: str, out_path: str, message_bytes: bytes):
     capacity = capacity__bits_BMP(dataa, offset)
 
     bytes_length = integer_bytes(len(message_bytes), Len_bytes)
-    PL = GAM + Len_bytes + message_bytes
+    PL = GAM + bytes_length + message_bytes
     PL_bits = bytes_bits(PL)
 
     if len(PL_bits) > capacity:
@@ -209,15 +213,15 @@ def DECODE(image_path: str):
     Len_bytes = bytes_header[4:12]
     Message_length = bytes_integer(Len_bytes)
 
-    capacity = capacity__bits_BMP(data, offset, width, height)
-    if bits_header +Message_length*8 > capacity:
+    capacity = capacity__bits_BMP(data, offset)
+    if len(bits_header) + Message_length*8 > capacity:
         raise ValueError("Message length dosent work with BMP image size, Data may be incomplete or corrupted")
 
-    Message_bits = extraction_bits(data, offset, BITS_header, Message_length*8)
+    Message_bits = extraction_bits(data, offset + BITS_header, Message_length*8)
     Message_bytes = bits_bytes(Message_bits)
 
-    next_offset = offset + bits_header + Message_length*8 
-    if next_offset + len(GAM)*8 <= capacity:
+    next_offset = offset + BITS_header + Message_length*8 
+    if (next_offset - offset) + len(GAM)*8 <= capacity:
         next_bits = extraction_bits(data, next_offset, len(GAM)*8)
         next_bytes = bits_bytes(next_bits)
         if next_bytes == GAM:
@@ -238,7 +242,7 @@ def DECODE(image_path: str):
             #USER input for steg application (MESSAGE)(TYPED OR FILE)
 def bytes_message():
     mode = input("\n Please Choose your message input; (Type message (T) / Provide file (F)): ").strip().lower()
-    if mode == " " or mode == 't':
+    if mode == '' or mode == 't':
         print("Please Enter Message (Leave an empty line when done)")
         msgg = []
         while True:
@@ -248,14 +252,14 @@ def bytes_message():
             msgg.append(msg)
         return '\n'.join(msgg).encode('utf-8')
     elif mode == 'f':
-        msg_path = input("Enter the path to the text file you want to encode").strip()
+        msg_path = Local_p(input("Enter the File name to the text file you want to encode")).strip()
         f = open(msg_path, 'rb')
         data = f.read()
         f.close()
         return data
     else:
         print("Invalid Choice, please choose betweent the given option")
-        return bytes_message
+        return bytes_message()
     
     #making the user choose between 2 options and if the user did not enter the options avaiable it will restart
 
@@ -265,12 +269,12 @@ def MAIN():
   while True: 
     mode = input("Please select mode; Encode (e) or Decode (d)").strip().lower()
     if mode == '' or mode == 'e':
-        image_input = input("Enter path to the BMP image; where the message will be encoded")
-        image_output = input("Enter path for the output of encoded BMP image")
+        image_input = Local_p(input("Enter BMP image file name; where the message will be encoded (e.g encode.bmp)")).strip()
+        image_output = Local_p(input("Enter File name for output of encoded BMP image")).strip()
         message_bytes = bytes_message()
         ENCODE(image_input, image_output, message_bytes)
     elif mode == 'd':
-        image_input = input("Please enter the path of the BMP image to decode")
+        image_input = Local_p(input("Please enter the File name of the BMP image to decode")).strip()
         message_bytes = DECODE(image_input)
         try: 
             print("\n The Decoded Message: \n")
@@ -282,4 +286,4 @@ def MAIN():
         print("Invalid Answer. Please try again, Choose between the following; Encode (e) or Decode (d)")
 
 if __name__ == "__main__":
-        MAIN()  
+    MAIN()  
