@@ -11,6 +11,9 @@ Header_BMP = 14 #14 byte file header (should not go over these bytes)
 Header_DIB_MIN = 40 #40 minimum for most BMP photos
 
 def Local_p(filename:str) -> str: #helps avoid any path file errors
+    if len(filename) >= 2 and filename[1] == ':':
+        return filename
+    
     BD = __file__[:__file__.rfind('\\')]
     return BD + '\\' + filename
 
